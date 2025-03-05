@@ -1,10 +1,12 @@
 package com.example.exchanger2.service;
 
 import com.example.exchanger2.CurrencyConverter;
-import com.example.exchanger2.repository.UserRepository;
 import com.example.exchanger2.domain.PutRequest;
 import com.example.exchanger2.domain.User;
+import com.example.exchanger2.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +20,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final CurrencyConverter currencyConverter;
 
-    public User addUser(User user) {
-        return userRepository.save(user);
+    public ResponseEntity<?> addUser(User user) {
+        if (userRepository.findByUsername(user.getUsername()) != null) {
+            return ResponseEntity.badRequest().body("Пользователь с таким именем уже существует");
+        }
+        return ResponseEntity.ok(userRepository.save(user));
     }
 
     public ResponseEntity<?> moneyTransfer(String username, PutRequest request) {
@@ -32,9 +37,8 @@ public class UserService {
             }
             user1.setBalance(user1.getBalance() - request.getBalance());
             user2.setBalance(user2.getBalance() + convertedBalance);
-            userRepository.saveAll(List.of(user1,user2));
+            userRepository.saveAll(List.of(user1, user2));
             return ResponseEntity.ok("Пользователь: " + username + " конвертировал " + request.getBalance() + " " + user1.getCurrency() + " в " + user2.getCurrency() + ". Обновленный баланс пользователя " + username + ": " + user1.getBalance() + ", Обновленный баланс пользователя " + request.getToUsername() + ": " + user2.getBalance());
-
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (RuntimeException e) {
@@ -46,11 +50,13 @@ public class UserService {
         return userRepository.findAll();
     }
 
+
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-    public ResponseEntity<?> getUSerByUsername(String username) {
+    @Cacheable(value = "users", key = "#username")
+    public ResponseEntity<?> getUserByUsername(String username) {
         try {
             User user = findByUsername(username);
             long id = user.getId();
@@ -62,6 +68,7 @@ public class UserService {
         }
     }
 
+    @CacheEvict(value = "users", key = "#username")
     public ResponseEntity<?> updateUserBalance(String username, PutRequest newBalance) {
         try {
             User user = findByUsername(username);
@@ -74,6 +81,7 @@ public class UserService {
         }
     }
 
+    @CacheEvict(value = "users", key = "#username")
     public ResponseEntity<?> updateUserCurrency(String username, PutRequest newCurrency, String currency) {
         try {
             User user = findByUsername(username);
@@ -89,7 +97,8 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> deleteUSer(String username) {
+    @CacheEvict(value = "users", key = "#username")
+    public ResponseEntity<?> deleteUser(String username) {
         try {
             User user = findByUsername(username);
             userRepository.delete(user);
