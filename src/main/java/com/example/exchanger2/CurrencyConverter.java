@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Component;//аннотация Spring, которая указывает на то, что класс является компонентом Spring. Это позволяет Spring автоматически обнаруживать и управлять экземплярами этого класса в контексте приложения.
 
 import java.io.IOException;
+
 @Component
 public class CurrencyConverter {
     private static final String BASE_URL = "https://v6.exchangerate-api.com/v6/c7da8bd28869af70b42f1ff9/latest/";

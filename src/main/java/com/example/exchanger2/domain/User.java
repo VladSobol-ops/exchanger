@@ -5,14 +5,14 @@ import lombok.Data;
 
 
 @Data
-@Entity//Указывает, что этот класс является сущностью JPA
-@Table(name = "users")//Указывает имя таблицы в базе данных.
+@Entity
+@Table(name = "users")
 public class User {
-    @Id//Указывает, что поле id является уникальным идентификатором для каждой записи.
-    @GeneratedValue(strategy = GenerationType.IDENTITY)//id будет автоматически генерироваться базой данных
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username")
+    @Column(name = "username",unique = true)
     private String username;
     private double balance;
     private String currency;

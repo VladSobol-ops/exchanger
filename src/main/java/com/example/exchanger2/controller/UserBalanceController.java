@@ -12,13 +12,13 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/users")
-@RequiredArgsConstructor//добавляет конструктор по полям
+@RequiredArgsConstructor
 public class UserBalanceController {
     private final UserService userService;
 
     @PostMapping("")
-    public ResponseEntity<User> addUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.addUser(user));
+    public ResponseEntity<?> addUser(@RequestBody User user) {
+        return userService.addUser(user);
     }
 
     @PostMapping("{username}/convert")
@@ -34,7 +34,7 @@ public class UserBalanceController {
 
     @GetMapping("/{username}")
     public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
-        return ResponseEntity.ok(userService.getUSerByUsername(username));
+        return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
     @PutMapping("/{username}")
@@ -50,7 +50,7 @@ public class UserBalanceController {
 
     @DeleteMapping("/{username}")
     public ResponseEntity<?> deleteUser(@PathVariable String username) {
-        return ResponseEntity.ok(userService.deleteUSer(username));
+        return ResponseEntity.ok(userService.deleteUser(username));
     }
 }
 
