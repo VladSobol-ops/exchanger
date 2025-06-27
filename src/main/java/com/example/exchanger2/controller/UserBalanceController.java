@@ -5,6 +5,7 @@ import com.example.exchanger2.domain.PutRequest;
 import com.example.exchanger2.domain.User;
 import com.example.exchanger2.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,11 @@ public class UserBalanceController {
 
     @GetMapping("/{username}")
     public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
-        return ResponseEntity.ok(userService.getUserByUsername(username));
+        User user = userService.getUserByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Пользователь не найден");
+        }
+        return ResponseEntity.ok(user);
     }
 
     @PutMapping("/{username}")

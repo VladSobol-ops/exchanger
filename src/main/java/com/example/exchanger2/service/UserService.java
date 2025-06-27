@@ -54,18 +54,9 @@ public class UserService {
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
-
     @Cacheable(value = "users", key = "#username")
-    public ResponseEntity<?> getUserByUsername(String username) {
-        try {
-            User user = findByUsername(username);
-            long id = user.getId();
-            String currency = user.getCurrency();
-            double balance = user.getBalance();
-            return ResponseEntity.ok("Id пользователя: " + id + "\nUsername: " + username + "\nБаланс: " + balance + " " + currency);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(NOT_FOUND).body(e.getMessage());
-        }
+    public User getUserByUsername(String username) {
+        return findByUsername(username);
     }
 
     @CacheEvict(value = "users", key = "#username")

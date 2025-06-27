@@ -11,12 +11,17 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - exchanger-net
 
   app:
     build: .
     container_name: exchanger-app
     depends_on:
-      - db
+      db:
+        condition: service_started
+      redis:
+        condition: service_healthy
     ports:
       - "8081:8081"
     environment:
@@ -28,6 +33,27 @@ services:
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
       - SERVER_PORT=8081
       - SERVER_ADDRESS=0.0.0.0
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+    networks:
+      - exchanger-net
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - exchanger-net
 
 volumes:
   db_data:
+
+networks:
+  exchanger-net:
+    driver: bridge
